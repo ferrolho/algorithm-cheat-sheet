@@ -1,0 +1,250 @@
+# ============================================================================
+#  Algorithm selector — editable source
+# ============================================================================
+#  This file IS the cheat sheet. Edit it, then run ./build.sh to regenerate
+#  the PDF. No other source needed.
+#
+#  STRUCTURE
+#  - The file is a list of `section`s (each becomes a titled box on the sheet).
+#  - Each section has `steps`: a list of decision points, read top to bottom.
+#
+#  A STEP is one of:
+#    • A question with one answer:
+#        - ask: Tree structure?
+#          if_yes: { use: DFS, when: "tree paths · explore branches" }
+#      (If the answer is "no", the reader falls through to the next step.)
+#
+#    • A question with both answers:
+#        - ask: Weighted edges?
+#          if_yes: { use: Dijkstra, when: "weighted edges" }
+#          if_no:  { use: BFS,      when: "unweighted shortest path" }
+#
+#    • A nested question (its `then:` is another list of steps):
+#        - ask: Contiguous span?
+#          then:
+#            - ask: Window invariant?
+#              if_yes: { use: Sliding Window, when: "..." }
+#
+#    • A fall-through default at the end of a section:
+#        - otherwise: { use: Specialized / Advanced Pattern, when: "..." }
+#
+#  FIELDS on a technique (`use`):
+#    use   = the technique name shown in the coloured pill
+#    when  = the italic trigger phrases shown under the pill (the words to
+#            look for in a problem statement). Use ` · ` to separate phrases.
+#
+#  COLOUR of each pill is decided automatically from the technique name
+#  (see fam() in config.py). Add new technique→family rules there if needed.
+#
+#  TIP: after editing, the columns may end up uneven. build.py will warn if
+#  the balance is off; ask the maintainer notes in README.md for re-balancing.
+#
+#  WORDING NOTE: the questions below are our own phrasing of a well-known
+#  algorithm-selection decision flow. The underlying logic (which clue points
+#  to which technique) is general computer-science knowledge; the wording,
+#  trigger phrases, grouping, colours, and layout in this repo are original.
+# ============================================================================
+
+- section: Graphs & trees
+  steps:
+  - ask: Tree structure?
+    then:
+    - ask: Level order or min depth?
+      if_yes:
+        use: BFS
+        when: shortest unweighted path · level order
+    - ask: Count or build tree shapes?
+      if_yes:
+        use: Divide & Conquer / Tree DP
+        when: count distinct trees · subtree DP
+      if_no:
+        use: DFS
+        when: tree paths · explore all branches
+  - ask: Directed acyclic graph?
+    if_yes:
+      use: Topological Sort
+      when: '"course schedule" · prerequisites · DAG'
+  - ask: Shortest path?
+    then:
+    - ask: Weighted edges?
+      if_yes:
+        use: Dijkstra's Algorithm
+        when: shortest path · weighted edges
+      if_no:
+        use: BFS
+        when: shortest unweighted path · level order
+  - ask: Connected components?
+    if_yes:
+      use: Disjoint Set Union
+      when: connected components · "merge accounts"
+  - ask: Tiny input?
+    if_yes:
+      use: DFS / Backtracking
+      when: enumerate paths · small graph
+    if_no:
+      use: BFS
+      when: shortest unweighted path · level order
+- section: Sorted, search & k-th
+  steps:
+  - ask: Sorted in, monotonic out?
+    then:
+    - ask: Range/rank queries + updates?
+      if_yes:
+        use: Ordered Set / Fenwick / Segment Tree
+        when: range sum + updates · order stats
+      if_no:
+        use: Binary Search
+        when: sorted array · "minimize the max"
+  - ask: Top-k or k-th?
+    if_yes:
+      use: Heap / Sorting
+      when: kth largest · "top k" · running median
+- section: Linked lists
+  steps:
+  - ask: Linked list?
+    then:
+    - ask: Fast/slow or offset pointers?
+      if_yes:
+        use: Two pointers
+        when: pair from ends · fast/slow · in-place
+    - ask: Merge several sorted lists?
+      if_yes:
+        use: Heap / Divide & Conquer
+        when: merge k sorted lists
+      if_no:
+        use: Linked-List Manipulation
+        when: reverse / reorder a list
+- section: Lookups, intervals, partition, strings
+  steps:
+  - ask: Lookup, count, or group?
+    if_yes:
+      use: Hash Table / Counting
+      when: frequency · "first unique" · group by
+  - ask: Overlapping intervals?
+    if_yes:
+      use: Sorting + Interval Scan
+      when: merge intervals · "meeting rooms"
+  - ask: Partition in place?
+    if_yes:
+      use: Two pointers / Partitioning
+      when: move zeroes · Dutch flag · in-place
+  - ask: Match/split via dictionary?
+    then:
+    - ask: Prefix/pattern search?
+      if_yes:
+        use: Trie / String Matching / Rolling Hash
+        when: prefix search · "starts with"
+      if_no:
+        use: Trie / DP / Memoization
+        when: word break · dictionary split
+- section: Small constraints (n is tiny)
+  steps:
+  - ask: Brute force viable?
+    if_yes:
+      use: Brute Force / Backtracking
+      when: all permutations / subsets · n ≤ 12
+  - ask: Track a subset?
+    if_yes:
+      use: Bitmask DP
+      when: n ≤ 20 · "visit all" · subset state
+    if_no:
+      use: Dynamic Programming
+      when: '"number of ways" · max/min with choices'
+- section: Subarrays & windows
+  steps:
+  - ask: Running sums?
+    if_yes:
+      use: Prefix Sums
+      when: subarray sum = k · cumulative totals
+  - ask: Contiguous span?
+    then:
+    - ask: Window invariant?
+      if_yes:
+        use: Sliding Window
+        when: longest/shortest substring · ≤ k distinct
+    - ask: Nearest greater/smaller?
+      if_yes:
+        use: Monotonic Stack
+        when: next greater · "daily temperatures"
+      if_no:
+        use: Dynamic Programming
+        when: '"number of ways" · max/min with choices'
+- section: Compute a max / min
+  steps:
+  - ask: Monotonic search space?
+    if_yes:
+      use: Binary Search
+      when: sorted array · "minimize the max"
+  - ask: Nearest greater/smaller?
+    if_yes:
+      use: Monotonic Stack
+      when: next greater · "daily temperatures"
+  - ask: Overlapping subproblems?
+    if_yes:
+      use: Dynamic Programming
+      when: '"number of ways" · max/min with choices'
+    if_no:
+      use: Greedy Algorithms
+      when: intervals · "jump game" · local choice
+- section: Counting arrangements
+  steps:
+  - ask: Brute force viable?
+    if_yes:
+      use: Brute Force / Backtracking
+      when: all permutations / subsets · n ≤ 12
+    if_no:
+      use: Dynamic Programming
+      when: '"number of ways" · max/min with choices'
+  - ask: Several sequences?
+    then:
+    - ask: Monotonic property?
+      if_yes:
+        use: Two pointers
+        when: pair from ends · fast/slow · in-place
+    - ask: Overlapping subproblems?
+      if_yes:
+        use: Dynamic Programming
+        when: '"number of ways" · max/min with choices'
+  - ask: Locate indices?
+    then:
+    - ask: Monotonic property?
+      if_yes:
+        use: Two pointers
+        when: pair from ends · fast/slow · in-place
+  - ask: Constant space?
+    then:
+    - ask: Monotonic property?
+      if_yes:
+        use: Two pointers
+        when: pair from ends · fast/slow · in-place
+- section: Parsing, design, simulation, math (the tail)
+  steps:
+  - ask: Parsing symbols?
+    then:
+    - ask: Count or optimise segments?
+      if_yes:
+        use: Dynamic Programming
+        when: '"number of ways" · max/min with choices'
+      if_no:
+        use: Stack
+        when: valid parentheses · expression parse
+  - ask: Design a structure?
+    if_yes:
+      use: Design + Supporting Structures
+      when: '"implement LRU / iterator"'
+  - ask: Just follow the rules?
+    if_yes:
+      use: Simulation / Basic DSA
+      when: follow the rules step by step
+  - ask: Math or bit tricks?
+    then:
+    - ask: Properties of numbers?
+      if_yes:
+        use: Number Theory
+        when: gcd / primes / modular arithmetic
+      if_no:
+        use: Math / Bit Manipulation
+        when: XOR tricks · powers · "single number"
+  - otherwise:
+      use: Specialized / Advanced Pattern
+      when: rare / problem-specific trick
