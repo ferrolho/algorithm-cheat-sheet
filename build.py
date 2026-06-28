@@ -104,7 +104,8 @@ def pill(x,y,text,frag,maxw):
 def kw_under(x,y,text,maxw,frag,emit):
     kw=KEYWORDS.get(text,'')
     if not kw: return 0
-    lines=wrap(kw,KF,maxw)[:2]
+    # ` || ` forces a line break between trigger phrases; each segment still wraps on width.
+    lines=[ln for seg in kw.split(' || ') for ln in wrap(seg,KF,maxw)][:2]
     for ln in lines:
         if emit:
             frag.append(f'<text x="{x:.1f}" y="{y+8:.1f}" font-size="{KF}" fill="#888780" font-style="italic">{esc(ln)}</text>')

@@ -32,6 +32,8 @@
 #    use   = the technique name shown in the coloured pill
 #    when  = the italic trigger phrases shown under the pill (the words to
 #            look for in a problem statement). Use ` · ` to separate phrases.
+#            Use ` || ` to force a line break between phrases (otherwise the
+#            text wraps on width, which can split a phrase mid-way).
 #
 #  COLOUR of each pill is decided automatically from the technique name
 #  (see fam() in config.py). Add new technique→family rules there if needed.
@@ -155,13 +157,13 @@
   - ask: Running sums?
     if_yes:
       use: Prefix Sums
-      when: subarray sum = k · cumulative totals
+      when: subarray sum = k · negatives allowed · cumulative totals
   - ask: Contiguous span?
     then:
     - ask: Window invariant?
       if_yes:
         use: Sliding Window
-        when: longest/shortest substring · ≤ k distinct
+        when: longest/shortest substring · ≤ k distinct || exactly k → atMost(k)−atMost(k−1)
     - ask: Nearest greater/smaller?
       if_yes:
         use: Monotonic Stack
