@@ -126,14 +126,14 @@ def draw_section(sec, ox, oy, emit, frag):
     th = len(wrap(title,13.5,cw-2,True))
     y += SEC_TITLE_H + (th-1)*15
 
-    def emit_pill_row(tag, tc, tech, rx, rw):
+    def emit_pill_row(tag, tc, tech, rx, rw, gap=GAP_ROW):
         nonlocal y
         y += 2  # gap between question text and pill
         if emit:
             frag.append(f'<text x="{rx+4:.1f}" y="{y+PILL_H/2+4:.1f}" font-size="9.0" fill="{tc}" font-weight="600">{tag}</text>')
             pill(rx+23, y, tech, frag, rw-23)
         kh = kw_under(rx+23, y+PILL_H+4, tech, rw-23, frag, emit)
-        y += PILL_H + 4 + kh + GAP_ROW
+        y += PILL_H + 4 + kh + gap
 
     def rows_draw(rows, depth):
         nonlocal y
@@ -149,9 +149,8 @@ def draw_section(sec, ox, oy, emit, frag):
                 for ln in wrap(r[1],QF,rw,True):
                     if emit: frag.append(f'<text x="{rx:.1f}" y="{y+10:.1f}" font-size="{QF}" font-weight="600" fill="#534AB7">{esc(ln)}</text>')
                     y+=LINE_Q
-                y+=1
+                y+=GAP_ROW  # same lead-in a pill gives the next question, so a grouping header isn't tighter
                 rows_draw(r[2], depth+1)
-                y+=2
             elif k in ('q','end'):
                 q,tech=r[1],r[2]
                 for ln in wrap(q,QF,rw):
@@ -165,7 +164,7 @@ def draw_section(sec, ox, oy, emit, frag):
                 for ln in wrap(q,QF,rw):
                     if emit: frag.append(f'<text x="{rx:.1f}" y="{y+10:.1f}" font-size="{QF}" fill="#444441">{esc(ln)}</text>')
                     y+=LINE_Q
-                emit_pill_row('Yes','#1D9E75',r[2],rx,rw)
+                emit_pill_row('Yes','#1D9E75',r[2],rx,rw,gap=0)  # Yes+No share a question: keep them tight
                 emit_pill_row('No','#D85A30',r[3],rx,rw)
 
     rows_draw(rows,0)
