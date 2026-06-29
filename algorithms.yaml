@@ -167,6 +167,18 @@
                 dp[c] = max(dp[c], dp[c-wt] + val)
         return dp[W]
 
+- name: Memoization
+  family: dp
+  big_o: O(states)
+  idea: Top-down DP — recurse on subproblems, cache each result in a dict.
+  code: |
+    memo = {}
+    def f(i):
+        if i <= 1: return i
+        if i in memo: return memo[i]
+        memo[i] = f(i-1) + f(i-2)
+        return memo[i]
+
 - name: Backtracking
   family: exhaust
   big_o: O(2ⁿ) / O(n!)
