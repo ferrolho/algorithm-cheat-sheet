@@ -81,8 +81,18 @@ def draw_card(card, ox, oy, emit, frag):
     for ln in wrap(card['idea'], IDEA_F, cw):
         if emit:
             frag.append(f'<text x="{inner_x:.1f}" y="{y+8:.1f}" font-size="{IDEA_F}" '
-                        f'fill="#7A7972" font-style="italic">{esc(ln)}</text>')
+                        f'fill="#7A7972">{esc(ln)}</text>')
         y += IDEA_LH
+
+    # optional concrete example, under the idea (italic)
+    ex = card.get('example')
+    if ex:
+        y += 2
+        for ln in wrap('Example: ' + ex, IDEA_F, cw):
+            if emit:
+                frag.append(f'<text x="{inner_x:.1f}" y="{y+8:.1f}" font-size="{IDEA_F}" '
+                            f'fill="#6E6D67" font-style="italic">{esc(ln)}</text>')
+            y += IDEA_LH
     y += 5
 
     # code strip
