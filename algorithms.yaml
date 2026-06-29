@@ -94,24 +94,26 @@
   big_o: O(log n)
   idea: Halve a sorted (or monotonic) space. Also "search on the answer".
   code: |
-    lo, hi = 0, len(a)      # answer: hi = max+1
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if ok(mid): hi = mid        # first True
-        else:       lo = mid + 1
-    return lo
+    def lower_bound(a, ok):    # first True index
+        lo, hi = 0, len(a)     # on answer: hi=max+1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if ok(mid): hi = mid
+            else:       lo = mid + 1
+        return lo
 
 - name: Two Pointers
   family: pointer
   big_o: O(n)
   idea: Walk a sorted array from both ends, or fast/slow on a list.
   code: |
-    i, j = 0, len(a) - 1
-    while i < j:
-        s = a[i] + a[j]
-        if s == target: return (i, j)
-        if s < target: i += 1
-        else:          j -= 1
+    def two_sum(a, target):    # a is sorted
+        i, j = 0, len(a) - 1
+        while i < j:
+            s = a[i] + a[j]
+            if s == target: return (i, j)
+            if s < target: i += 1
+            else:          j -= 1
 
 - name: Sliding Window
   family: pointer
@@ -158,11 +160,12 @@
   big_o: O(n·W)
   idea: Build answers from overlapping subproblems (0/1 knapsack shown).
   code: |
-    dp = [0]*(W + 1)
-    for wt, val in items:
-        for c in range(W, wt-1, -1):    # 0/1: down
-            dp[c] = max(dp[c], dp[c-wt] + val)
-    return dp[W]
+    def knapsack(items, W):
+        dp = [0]*(W + 1)
+        for wt, val in items:
+            for c in range(W, wt-1, -1):   # 0/1: down
+                dp[c] = max(dp[c], dp[c-wt] + val)
+        return dp[W]
 
 - name: Backtracking
   family: exhaust
