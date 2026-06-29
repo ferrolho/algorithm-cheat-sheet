@@ -10,7 +10,7 @@ A **two-sided A4 landscape PDF** — exact A4, prints with no scaling
 
 <p align="center">
   <a href="algorithm-cheat-sheet.pdf" target="_blank" rel="noopener noreferrer">
-    <img src="preview.png" alt="Front — the Algorithm Selection flow (click to open the PDF)" width="100%">
+    <img src="preview-front.png" alt="Front — the Algorithm Selection flow (click to open the PDF)" width="100%">
     <img src="preview-back.png" alt="Back — how the main algorithms work (click to open the PDF)" width="100%">
   </a>
 </p>
@@ -31,11 +31,13 @@ card with a `name`, a colour `family`, a `big_o` badge, a one-line `idea`, and a
 `code` template (a YAML literal block — keep lines ≤ ~50 monospace chars). The comment
 header there has the details.
 
-Colours come from the shared [`config.py`](config.py) `FAMILY` palette (the front
-derives a pill's family from its technique name via `fam()`; the back names its family
-explicitly so both sides match). Layout constants live at the top of each builder;
-text is measured via [`textmetrics.py`](textmetrics.py); and balancing the boxes
-across 4 columns is automatic on both pages.
+Each page has its own renderer — [`front.py`](front.py) and [`back.py`](back.py) —
+and [`build.py`](build.py) assembles the two into the PDF. Colours come from the
+shared [`config.py`](config.py) `FAMILY` palette (the front derives a pill's family
+from its technique name via `fam()`; the back names its family explicitly so both
+sides match). Layout constants live at the top of each builder; text is measured via
+[`textmetrics.py`](textmetrics.py); and balancing the boxes across 4 columns is
+automatic on both pages.
 
 ## Rebuild
 
