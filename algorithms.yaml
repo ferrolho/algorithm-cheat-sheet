@@ -55,7 +55,7 @@
     indeg = [0] * n
     for u in range(n):
         for v in adj[u]: indeg[v] += 1
-    q = deque(u for u in range(n) if indeg[u]==0)
+    q = deque(u for u in range(n) if indeg[u] == 0)
     order = []
     while q:
         u = q.popleft(); order.append(u)
@@ -75,7 +75,7 @@
     while pq:
         d, u = heapq.heappop(pq)
         if d > dist[u]: continue
-        for v, w in adj[u]:
+        for v, w in adj[u]:     # (neighbour, weight)
             if d + w < dist[v]:
                 dist[v] = d + w
                 heapq.heappush(pq, (dist[v], v))
@@ -129,7 +129,7 @@
   example: 'longest with ≤ k distinct; "eceba", k=2 → 3'
   code: |
     from collections import Counter
-    left = 0; cnt = Counter()
+    best, left = 0, 0; cnt = Counter()
     for right, x in enumerate(arr):
         cnt[x] += 1
         while len(cnt) > k:          # shrink
