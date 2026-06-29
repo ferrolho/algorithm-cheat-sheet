@@ -1,27 +1,41 @@
-# Algorithm Selection Cheat Sheet
+# Algorithm Cheat Sheet
 
-A single-page **A4 landscape PDF** mapping "clue in the problem statement" →
-"technique to reach for", inspired by the AlgoMonster flowchart. The finished sheet
-is [`algorithm-cheat-sheet.pdf`](algorithm-cheat-sheet.pdf) — exact A4, prints with no scaling.
+A **two-sided A4 landscape PDF** — exact A4, prints with no scaling
+([`algorithm-cheat-sheet.pdf`](algorithm-cheat-sheet.pdf)):
+
+- **Front — selection flow.** Maps "clue in the problem statement" → "technique to
+  reach for", inspired by the AlgoMonster flowchart.
+- **Back — how they work.** A minimal Python-ish template for each technique on the
+  front (the mechanism, not a full implementation) with its typical time complexity.
 
 <p align="center">
   <a href="algorithm-cheat-sheet.pdf" target="_blank" rel="noopener noreferrer">
-    <img src="preview.png" alt="The Algorithm Selection Cheat Sheet — click to open the PDF" width="100%">
+    <img src="preview.png" alt="Front — the Algorithm Selection flow (click to open the PDF)" width="100%">
+    <img src="preview-back.png" alt="Back — how the main algorithms work (click to open the PDF)" width="100%">
   </a>
 </p>
 
 ## Editing
 
-Everything comes from [`flowchart.yaml`](flowchart.yaml) — edit it, then rebuild.
-Each `section` is a titled box whose `steps` are decision points read top to bottom.
-A step is a question with `if_yes` (a "No" falls through to the next step), with
-`if_yes` + `if_no`, with a nested `then:`, or a final `otherwise:` default. Each
-technique has a `use` (pill label) and `when` (italic trigger phrases, ` · `-separated).
-The comment header in `flowchart.yaml` has the full format and examples.
+Both pages are generated from editable YAML — edit, then rebuild.
 
-Pill colours come from the technique name via `fam()` in [`config.py`](config.py),
-layout constants live at the top of [`build.py`](build.py), and balancing the sections
-across 4 columns is automatic.
+**Front** comes from [`flowchart.yaml`](flowchart.yaml). Each `section` is a titled
+box whose `steps` are decision points read top to bottom. A step is a question with
+`if_yes` (a "No" falls through to the next step), with `if_yes` + `if_no`, with a
+nested `then:`, or a final `otherwise:` default. Each technique has a `use` (pill
+label) and `when` (italic trigger phrases, ` · `-separated). The comment header in
+`flowchart.yaml` has the full format and examples.
+
+**Back** comes from [`algorithms.yaml`](algorithms.yaml). Each entry is a pattern
+card with a `name`, a colour `family`, a `big_o` badge, a one-line `idea`, and a
+`code` template (a YAML literal block — keep lines ≤ ~50 monospace chars). The comment
+header there has the details.
+
+Colours come from the shared [`config.py`](config.py) `FAMILY` palette (the front
+derives a pill's family from its technique name via `fam()`; the back names its family
+explicitly so both sides match). Layout constants live at the top of each builder;
+text is measured via [`textmetrics.py`](textmetrics.py); and balancing the boxes
+across 4 columns is automatic on both pages.
 
 ## Rebuild
 
@@ -49,5 +63,5 @@ is used only nominatively to credit the inspiration; if their tool helps you, su
 the original.
 
 Code and YAML are released under the **MIT License** (see [`LICENSE`](LICENSE)). The
-committed `algorithm-cheat-sheet.pdf` is a build output of `flowchart.yaml`, which
-remains the source of truth.
+committed `algorithm-cheat-sheet.pdf` is a build output of `flowchart.yaml` (front)
+and `algorithms.yaml` (back), which remain the source of truth.

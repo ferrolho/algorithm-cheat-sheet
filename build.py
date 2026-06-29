@@ -14,62 +14,9 @@ TOP = 86
 
 def esc(s): return H.escape(s)
 
-from PIL import ImageFont
-
-# Resolve a Helvetica/Arial-metric-compatible TTF for text measurement. The SVG
-# declares "Arial, Helvetica, sans-serif", so we measure with a metric-compatible
-# face to make pills hug their labels identically across platforms. The first
-# existing path wins; override with the ALGOSEL_FONT_REGULAR / ALGOSEL_FONT_BOLD
-# environment variables to point at any Helvetica/Arial-like TTF.
-_FONT_CANDIDATES = {
-    'regular': [
-        os.environ.get('ALGOSEL_FONT_REGULAR'),
-        # Linux — Liberation Sans is metric-compatible with Arial
-        '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
-        '/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf',
-        # macOS
-        '/System/Library/Fonts/Supplemental/Arial.ttf',
-        '/Library/Fonts/Arial.ttf',
-        '/System/Library/Fonts/Helvetica.ttc',
-        # Windows
-        'C:\\Windows\\Fonts\\arial.ttf',
-        # Last-resort fallback (metrics differ slightly but keeps the build working)
-        '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-    ],
-    'bold': [
-        os.environ.get('ALGOSEL_FONT_BOLD'),
-        '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
-        '/usr/share/fonts/liberation-sans/LiberationSans-Bold.ttf',
-        '/System/Library/Fonts/Supplemental/Arial Bold.ttf',
-        '/Library/Fonts/Arial Bold.ttf',
-        '/System/Library/Fonts/Helvetica.ttc',
-        'C:\\Windows\\Fonts\\arialbd.ttf',
-        '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-    ],
-}
-
-def _resolve_font(kind):
-    for path in _FONT_CANDIDATES[kind]:
-        if path and os.path.exists(path):
-            return path
-    raise FileNotFoundError(
-        f"No {kind} Helvetica/Arial-compatible font found. Install Liberation Sans "
-        f"(Linux: `liberation-fonts` / `fonts-liberation`) or set the "
-        f"ALGOSEL_FONT_{kind.upper()} environment variable to a TTF path.")
-
-_FONT_REG = _resolve_font('regular')
-_FONT_BLD = _resolve_font('bold')
-_cache = {}
-def measure(s, size, bold=False):
-    key = (round(size), bold)
-    f = _cache.get(key)
-    if f is None:
-        f = ImageFont.truetype(_FONT_BLD if bold else _FONT_REG, int(round(size)))
-        _cache[key] = f
-    return f.getbbox(s)[2]
-
-def tw(s,size,bold=False):
-    return measure(s, size, bold)
+# Text measurement (font resolution + measure/tw/wrap) is shared with the back
+# page; see textmetrics.py.
+from textmetrics import measure, tw, wrap
 
 PILL_H = 21
 SEC_PAD = 11
@@ -80,15 +27,6 @@ QF = 12.0     # question font
 TF = 12.0     # pill text font
 KF = 10.5     # keyword font
 LINE_Q = 15   # line height for wrapped question text
-
-def wrap(s,size,maxw,bold=False):
-    words=s.split(); lines=[]; cur=''
-    for w in words:
-        t=(cur+' '+w).strip()
-        if tw(t,size,bold)>maxw and cur: lines.append(cur); cur=w
-        else: cur=t
-    if cur: lines.append(cur)
-    return lines
 
 def pill(x,y,text,frag,maxw):
     fill,band,fg = FAMILY[fam(text)]
@@ -215,7 +153,7 @@ for (c,x,y,i) in place:
 svg=[]
 svg.append(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{pageH:.0f}" viewBox="0 0 {W} {pageH:.0f}" font-family="Arial, Helvetica, sans-serif">')
 svg.append(f'<rect x="0" y="0" width="{W}" height="{pageH:.0f}" fill="#ffffff"/>')
-svg.append(f'<text x="{M}" y="38" font-size="21" font-weight="700" fill="#2C2C2A">Algorithm Selection Cheat Sheet</text>')
+svg.append(f'<text x="{M}" y="38" font-size="21" font-weight="700" fill="#2C2C2A">Algorithm Cheat Sheet · Which to Use</text>')
 svg.append(f'<text x="{M}" y="58" font-size="11" fill="#5F5E5A">Find the first matching clue, then take the technique it points to. Italic phrases under each pill are the words to look for in the problem statement. Inspired by AlgoMonster\u2019s flowchart.</text>')
 svg.append(f'<line x1="{M}" y1="70" x2="{W-M}" y2="70" stroke="#D3D1C7" stroke-width="1"/>')
 svg+=frag
@@ -243,29 +181,38 @@ print('pageH',round(pageH),'aspect',round(W/pageH,3),'(A4 land 1.414)','cols',[r
 import cairosvg
 from pypdf import PdfReader, PdfWriter, PageObject, Transformation
 from reportlab.lib.pagesizes import A4, landscape
+from back import build_back_svg
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-_svg = os.path.join(_HERE, 'algorithm-cheat-sheet.svg')
-_tmp = os.path.join(_HERE, '_content.pdf')
+_svg = os.path.join(_HERE, 'algorithm-cheat-sheet.svg')          # front (page 1)
+_svg_back = build_back_svg()                                     # back  (page 2)
 _out = os.path.join(_HERE, 'algorithm-cheat-sheet.pdf')
 
-cairosvg.svg2pdf(url=_svg, write_to=_tmp)
 pw, ph = landscape(A4)
-src = PdfReader(_tmp).pages[0]
-sw, sh = float(src.mediabox.width), float(src.mediabox.height)
 m = 6
-scale = min((pw - 2*m)/sw, (ph - 2*m)/sh)
-tx, ty = (pw - sw*scale)/2, (ph - sh*scale)/2
+
+def _fit_page(svg_path):
+    """Render an SVG to a vector PDF page and centre-fit it onto A4 landscape."""
+    tmp = svg_path[:-4] + '.tmp.pdf'
+    cairosvg.svg2pdf(url=svg_path, write_to=tmp)
+    src = PdfReader(tmp).pages[0]
+    sw, sh = float(src.mediabox.width), float(src.mediabox.height)
+    scale = min((pw - 2*m)/sw, (ph - 2*m)/sh)
+    tx, ty = (pw - sw*scale)/2, (ph - sh*scale)/2
+    pg = PageObject.create_blank_page(width=pw, height=ph)
+    pg.merge_transformed_page(src, Transformation().scale(scale).translate(tx, ty))
+    os.remove(tmp)
+    return pg
+
 w = PdfWriter()
-pg = PageObject.create_blank_page(width=pw, height=ph)
-pg.merge_transformed_page(src, Transformation().scale(scale).translate(tx, ty))
-w.add_page(pg)
+w.add_page(_fit_page(_svg))        # page 1 — selection flow
+w.add_page(_fit_page(_svg_back))   # page 2 — how they work
 with open(_out, 'wb') as f:
     w.write(f)
-os.remove(_tmp)
-print('Wrote', os.path.basename(_out))
+print('Wrote', os.path.basename(_out), '(2 pages)')
 
-# raster preview for the README (clickable thumbnail that links to the PDF)
-_png = os.path.join(_HERE, 'preview.png')
-cairosvg.svg2png(url=_svg, write_to=_png, output_width=1600, background_color='white')
-print('Wrote', os.path.basename(_png))
+# raster previews for the README (clickable thumbnails that link to the PDF)
+for svg_path, png_name in [(_svg, 'preview.png'), (_svg_back, 'preview-back.png')]:
+    png = os.path.join(_HERE, png_name)
+    cairosvg.svg2png(url=svg_path, write_to=png, output_width=1600, background_color='white')
+    print('Wrote', png_name)
