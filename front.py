@@ -20,7 +20,7 @@ M = 26
 NCOL = 4
 GUT = 14
 COLW = (W - 2*M - (NCOL-1)*GUT) / NCOL
-TOP = 104
+TOP = 86
 
 PILL_H = 21
 SEC_PAD = 11
@@ -225,11 +225,13 @@ def build_front_svg(out_path=None, src=None):
     svg.append(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{pageH:.0f}" viewBox="0 0 {W} {pageH:.0f}" font-family="Arial, Helvetica, sans-serif">')
     svg.append(f'<rect x="0" y="0" width="{W}" height="{pageH:.0f}" fill="#ffffff"/>')
     svg.append(f'<text x="{M}" y="38" font-size="21" font-weight="700" fill="#2C2C2A">Algorithm Cheat Sheet · Which to Use</text>')
-    svg.append(f'<text x="{M}" y="58" font-size="11" fill="#5F5E5A">Find the first matching clue, then take the technique it points to. Italic phrases under each pill are the words to look for in the problem statement. Inspired by AlgoMonster’s flowchart.</text>')
-    # divider below the subtitle, then the constraints → complexity strip beneath it
-    svg.append(f'<line x1="{M}" y1="70" x2="{W-M}" y2="70" stroke="#D3D1C7" stroke-width="1"/>')
+    # subtitle: right-aligned beside the title, sharing its baseline (bottoms colinear)
+    _sub = "Find the first matching clue, then take the technique it points to. Italic phrases under each pill are the words to look for in the problem statement. Inspired by AlgoMonster’s flowchart."
+    svg.append(f'<text x="{W-M:.0f}" y="38" font-size="11" fill="#5F5E5A" text-anchor="end">{esc(_sub)}</text>')
+    # divider below the title/subtitle row, then the constraints strip beneath it
+    svg.append(f'<line x1="{M}" y1="52" x2="{W-M}" y2="52" stroke="#D3D1C7" stroke-width="1"/>')
     # constraints → complexity — the first filter: n caps the complexity you can afford
-    _sy = 84
+    _sy = 66
     _bk = [('n ≤ 12', 'O(n!)'), ('≤ 20', 'O(2ⁿ)'), ('≤ 500', 'O(n³)'), ('≤ 5000', 'O(n²)'),
            ('≤ 10^6', 'O(n log n)'), ('≤ 10^8', 'O(n)'), ('≥ 10^9', 'O(log n)')]
     _head = ('<tspan font-weight="700" fill="#888780">CONSTRAINTS </tspan>'

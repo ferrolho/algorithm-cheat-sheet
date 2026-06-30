@@ -20,7 +20,7 @@ M = 26
 NCOL = 4
 GUT = 14
 COLW = (W - 2*M - (NCOL-1)*GUT) / NCOL
-TOP = 86
+TOP = 68
 
 # --- card metrics ----------------------------------------------------------
 PAD = 11          # inner padding of a card
@@ -178,8 +178,9 @@ def build_back_svg(out_path=None, src=None, cards=None):
            f'viewBox="0 0 {W} {pageH:.0f}" font-family="Arial, Helvetica, sans-serif">']
     svg.append(f'<rect x="0" y="0" width="{W}" height="{pageH:.0f}" fill="#ffffff"/>')
     svg.append(f'<text x="{M}" y="38" font-size="21" font-weight="700" fill="#2C2C2A">Algorithm Cheat Sheet · How They Work</text>')
-    svg.append(f'<text x="{M}" y="58" font-size="11" fill="#5F5E5A">The mechanism behind each technique on the front — minimal Python-ish templates, not full implementations. Badge = typical time complexity.</text>')
-    svg.append(f'<line x1="{M}" y1="70" x2="{W-M}" y2="70" stroke="#D3D1C7" stroke-width="1"/>')
+    # subtitle: right-aligned beside the title, sharing its baseline (bottoms colinear)
+    svg.append(f'<text x="{W-M:.0f}" y="38" font-size="11" fill="#5F5E5A" text-anchor="end">The mechanism behind each technique on the front — minimal Python-ish templates, not full implementations. Badge = typical time complexity.</text>')
+    svg.append(f'<line x1="{M}" y1="52" x2="{W-M}" y2="52" stroke="#D3D1C7" stroke-width="1"/>')
     svg += frag
 
     fy = max(colY) + 26
