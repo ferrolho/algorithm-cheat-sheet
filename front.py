@@ -20,7 +20,7 @@ M = 26
 NCOL = 4
 GUT = 14
 COLW = (W - 2*M - (NCOL-1)*GUT) / NCOL
-TOP = 86
+TOP = 104
 
 PILL_H = 21
 SEC_PAD = 11
@@ -226,7 +226,21 @@ def build_front_svg(out_path=None, src=None):
     svg.append(f'<rect x="0" y="0" width="{W}" height="{pageH:.0f}" fill="#ffffff"/>')
     svg.append(f'<text x="{M}" y="38" font-size="21" font-weight="700" fill="#2C2C2A">Algorithm Cheat Sheet · Which to Use</text>')
     svg.append(f'<text x="{M}" y="58" font-size="11" fill="#5F5E5A">Find the first matching clue, then take the technique it points to. Italic phrases under each pill are the words to look for in the problem statement. Inspired by AlgoMonster’s flowchart.</text>')
+    # divider below the subtitle, then the constraints → complexity strip beneath it
     svg.append(f'<line x1="{M}" y1="70" x2="{W-M}" y2="70" stroke="#D3D1C7" stroke-width="1"/>')
+    # constraints → complexity — the first filter: n caps the complexity you can afford
+    _sy = 84
+    _bk = [('n ≤ 12', 'O(n!)'), ('≤ 20', 'O(2ⁿ)'), ('≤ 500', 'O(n³)'), ('≤ 5000', 'O(n²)'),
+           ('≤ 10^6', 'O(n log n)'), ('≤ 10^8', 'O(n)'), ('≥ 10^9', 'O(log n)')]
+    _head = ('<tspan font-weight="700" fill="#888780">CONSTRAINTS </tspan>'
+             '<tspan dy="-1.2">→</tspan><tspan dy="1.2">'
+             '<tspan font-weight="700" fill="#888780"> COMPLEXITY</tspan></tspan>')
+    _pairs = '   ·   '.join(
+        f'<tspan font-weight="700" fill="#3A3A37">{esc(th)}</tspan> '
+        f'<tspan dy="-1.2">→</tspan><tspan dy="1.2"> {esc(cx)}</tspan>'
+        for th, cx in _bk)
+    svg.append(f'<text x="{M}" y="{_sy}" font-size="10.5" fill="#5F5E5A" xml:space="preserve">{_head}      {_pairs}</text>')
+    svg.append(f'<text x="{W-M:.0f}" y="{_sy}" font-size="9.5" fill="#888780" font-style="italic" text-anchor="end">rough budget ~10^8 ops/s · Python ~10^7 · memory ~256 MB</text>')
     svg += frag
     fy = max(colY) + 26
     svg.append(f'<line x1="{M}" y1="{fy-15:.0f}" x2="{W-M}" y2="{fy-15:.0f}" stroke="#D3D1C7" stroke-width="1"/>')
